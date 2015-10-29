@@ -32,7 +32,7 @@ alti = 0
 while handshake:
     if (first_ack == 0):
         ser.write("h")
-        
+
     response = ser.readline()
     if (response != ''):
         print (response)
@@ -131,7 +131,7 @@ try:
         Building= utils.getBuildingFromNode(finalNode),
         Level= utils.getLevelFromNode(finalNode)
     )
-    #respX = 
+    #respX =
     resp1 = requests.get(url=mainUrl, params=params5)
     #print resp1.text
     resp2 = requests.get(url=mainUrl, params=params6)
@@ -178,7 +178,7 @@ path = []
 if(not utils.isFromSameMap(initialNode, finalNode)): #checks whether the initial and final node are from same map.
     #This block finds the shortest path from initialNode to intersection and intersection to final node
     #Works for two maps.
-    
+
     TONodeBuilding = utils.getCOMBuildingFromNode(finalNode)
     TONodeLevel = utils.getLevelFromNode(finalNode)
     #finds the TO Node in the current map that links to the next map with building name TONoeBuilding

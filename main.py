@@ -140,7 +140,7 @@ try:
     dataArray.append({(utils.getBuildingFromNode(initialNode) + "#" + utils.getLevelFromNode(initialNode)) : utils.mapifyNodeIDs(json.loads(resp1.text), utils.getBuildingFromNode(initialNode), utils.getLevelFromNode(initialNode))})
     if(not utils.isFromSameMap(initialNode, finalNode)):
         dataArray.append({(utils.getBuildingFromNode(finalNode) + "#" + utils.getLevelFromNode(finalNode)) : utils.mapifyNodeIDs(json.loads(resp2.text), utils.getBuildingFromNode(finalNode), utils.getLevelFromNode(finalNode))})
-    #This gets the value from Data array which is an array fo dictionaries. getValueFromArrayOfDicts gets the data from
+    #This gets the value from Data array which is an array fo dictionaries. getValueFromArrayOfDicts gets the data from the array of dictionaries
     #[{"1#2": jsondata1}, {"2#2" : jsondata2}], data will become jsondata1 if the first parameter is "1#2"
     data = utils.getValueFromArrayOfDicts((utils.getBuildingFromNode(initialNode) + "#" + utils.getLevelFromNode(initialNode)), dataArray)
     finalData = utils.getValueFromArrayOfDicts((utils.getBuildingFromNode(finalNode) + "#" + utils.getLevelFromNode(finalNode)), dataArray)
@@ -177,6 +177,7 @@ path = []
 if(not utils.isFromSameMap(initialNode, finalNode)): #checks whether the initial and final node are from same map.
     #This block finds the shortest path from initialNode to intersection and intersection to final node
     #Works for two maps.
+    
     TONodeBuilding = utils.getCOMBuildingFromNode(finalNode)
     TONodeLevel = utils.getLevelFromNode(finalNode)
     #finds the TO Node in the current map that links to the next map with building name TONoeBuilding
@@ -211,6 +212,7 @@ magQueue = deque([], maxlen=5)
 magQueue.append(givenMagValue)
 #data initially is the initialNode map's data
 # IMPORTANT: data needs to get updated everywhere in the while(true) if the node is from a new map.
+# dataArray contains all the maps. just load the relevant map from the array on reaching a node in the next map.
 print (offset)
 print ("data")
 print (data)

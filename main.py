@@ -59,6 +59,7 @@ def textToSpeech(str):
 
 textToSpeech("Handshake Established")
 
+#returns shortest path array given data['map'], initial node and final node from the same map.
 def getShortestPath(mapVar, initialNode, finalNode):
     table_location = utils.build_location_table(mapVar)
     print (table_location)

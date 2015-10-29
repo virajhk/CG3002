@@ -134,9 +134,14 @@ try:
     resp1 = requests.get(url=mainUrl, params=params5)
     #print resp1.text
     resp2 = requests.get(url=mainUrl, params=params6)
+    #Data Array is an array of dictionaries that contains all the maps' data in the format - [{"1#2": jsondata}]
+    # In the above line building number is 1 and the level is 2. The value of the dictionary is the json value with node ID's
+    # as 1#2#1 is node number 1, 1#2#21 is node number 21. All node ID's are renamed as such using mapifyNodeID's
     dataArray.append({(utils.getBuildingFromNode(initialNode) + "#" + utils.getLevelFromNode(initialNode)) : utils.mapifyNodeIDs(json.loads(resp1.text), utils.getBuildingFromNode(initialNode), utils.getLevelFromNode(initialNode))})
     if(not utils.isFromSameMap(initialNode, finalNode)):
         dataArray.append({(utils.getBuildingFromNode(finalNode) + "#" + utils.getLevelFromNode(finalNode)) : utils.mapifyNodeIDs(json.loads(resp2.text), utils.getBuildingFromNode(finalNode), utils.getLevelFromNode(finalNode))})
+    #This gets the value from Data array which is an array fo dictionaries. getValueFromArrayOfDicts gets the data from
+    #[{"1#2": jsondata1}, {"2#2" : jsondata2}], data will become jsondata1 if the first parameter is "1#2"
     data = utils.getValueFromArrayOfDicts((utils.getBuildingFromNode(initialNode) + "#" + utils.getLevelFromNode(initialNode)), dataArray)
     finalData = utils.getValueFromArrayOfDicts((utils.getBuildingFromNode(finalNode) + "#" + utils.getLevelFromNode(finalNode)), dataArray)
     print "Wifi Works"
@@ -156,7 +161,8 @@ except:
     initialNode = "1#2#" + str(array[2])
     array2 = finalNode.split('#')
     finalNode = "1#2#" + str(array2[2])
-
+    #This gets the value from Data array which is an array fo dictionaries. getValueFromArrayOfDicts gets the data from
+    #[{"COM1#2": jsondata1}, {"COM22#2" : jsondata2}], data will become jsondata1 if the first parameter is "COM1#2"
     data = utils.getValueFromArrayOfDicts((utils.getCOMBuildingFromNode(initialNode) + "#" + utils.getLevelFromNode(initialNode)), dataArray)
     finalData = utils.getValueFromArrayOfDicts((utils.getCOMBuildingFromNode(finalNode) + "#" + utils.getLevelFromNode(finalNode)), dataArray)
 
@@ -168,10 +174,17 @@ def PrintPathDictionary(path, Map):
             if p == m['nodeId']:
                 print(str(p) + " : " + str(m['nodeName']))
 path = []
-if(not utils.isFromSameMap(initialNode, finalNode)):
+if(not utils.isFromSameMap(initialNode, finalNode)): #checks whether the initial and final node are from same map.
+    #This block finds the shortest path from initialNode to intersection and intersection to final node
+    #Works for two maps.
     TONodeBuilding = utils.getCOMBuildingFromNode(finalNode)
     TONodeLevel = utils.getLevelFromNode(finalNode)
+    #finds the TO Node in the current map that links to the next map with building name TONoeBuilding
+    # and building level as TONodeLevel
+    # TONodeBuilding - COM2, TONodeLevel - 2, data['map'] is the map of the initial node's json data
+    # The return will be the node ID of the TONode
     TONode = utils.findTONodeFromMap(data['map'], TONodeBuilding, TONodeLevel)
+    #given the TONode, finds the first node of the next map. "TO COM2-2-11" will return "11"
     firstNodeNextMap = utils.getNextMapFirstNodeFromTONode(data['map'], TONode)
     #adds the com number and level before the node id
     print (firstNodeNextMap)
@@ -179,11 +192,14 @@ if(not utils.isFromSameMap(initialNode, finalNode)):
     COMNumber = (re.findall('\d+', utils.getCOMBuildingFromNode(finalNode)))[0]
     mapifiedfirstNodeNextMap =  COMNumber + utils.getLevelFromNode(finalNode) + firstNodeNextMap
     print (mapifiedfirstNodeNextMap)
-    path.append({(utils.getCOMBuildingFromNode(initialNode) + utils.getLevelFromNode(initialNode)) : getShortestPath(data['map'], initialNode, TONode)})
-    path.append({(utils.getCOMBuildingFromNode(finalNode) + utils.getLevelFromNode(finalNode)) : getShortestPath(finalData['map'], mapifiedfirstNodeNextMap, finalNode)})
+    #path is an array of dictionaries
+    # path - [{"COM1#2": [array of shortest path from initial node to intersection]}, {"COM2#2": [array of shortest path from intersection to final node]}]
+    path.append({(utils.getCOMBuildingFromNode(initialNode) + "#" + utils.getLevelFromNode(initialNode)) : getShortestPath(data['map'], initialNode, TONode)})
+    path.append({(utils.getCOMBuildingFromNode(finalNode) + "#" + utils.getLevelFromNode(finalNode)) : getShortestPath(finalData['map'], mapifiedfirstNodeNextMap, finalNode)})
 else:
-    path.append({(utils.getCOMBuildingFromNode(initialNode) + utils.getLevelFromNode(initialNode)) : getShortestPath(data['map'], initialNode, finalNode)})
+    path.append({(utils.getCOMBuildingFromNode(initialNode) + "#" + utils.getLevelFromNode(initialNode)) : getShortestPath(data['map'], initialNode, finalNode)})
 
+#Path was redefined to make it an array of integers rather than array of dictionaries for the first demo.
 path = list(path[0].values())[0]
 print (path)
 PrintPathDictionary(path, data['map'])
@@ -193,6 +209,8 @@ offset = 360 - wt.getMapNorthAt(data)
 givenMagValue = 131;
 magQueue = deque([], maxlen=5)
 magQueue.append(givenMagValue)
+#data initially is the initialNode map's data
+# IMPORTANT: data needs to get updated everywhere in the while(true) if the node is from a new map.
 print (offset)
 print ("data")
 print (data)
@@ -201,6 +219,7 @@ magArray = []
 wt.magnetometerValues2 = [givenMagValue] + wt.magnetometerValues2 #adding the first mag value to the beginning of the array
 accVal = 0
 magVal = 1
+#Curr node initially is the first node in the shortest path array.
 currNodeCrossed = path[0]
 currNodeCrossedX = wt.getNodeX(currNodeCrossed,data)
 currNodeCrossedY = wt.getNodeY(currNodeCrossed,data)
@@ -240,6 +259,7 @@ while(True):
     currNodeCrossedX = wt.getNodeX(currNodeCrossed,data)
     currNodeCrossedY = wt.getNodeY(currNodeCrossed,data)
     stepTaken = False
+    #Get next checkpoint with respect to currNodeCrossed
     nextCheckpoint = wt.getNextCheckpoint(path, currNodeCrossed)
     #print "nextCheckpoint" + str(nextCheckpoint)
     if(nextCheckpoint == wt.LAST_CONST):

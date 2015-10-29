@@ -1,16 +1,16 @@
 import pygame
 pygame.mixer.init()
-
-STEP_LENGTH = 45 #we can change this later
-NAV_THRESHOLD = 70 # we can change this later
-LAST_CONST = "last"
 import djikstra as dj
 import utils
 from math import sqrt
 import math
 import json
+STEP_LENGTH = 45
+NAV_THRESHOLD = 70   # the threshold distance ard a node
+LAST_CONST = "last"
 dontGoStraight = 0
 # For acceleration, if the x value changes by more than 0.3 g, a step has been taken
+#-----------------------testing---------------------------
 with open("xyz.json") as data_file:
     dummydata = json.load(data_file)
 # dummy array values
@@ -19,82 +19,93 @@ accelerationX = [1.9, 2.1] * 85
 magnetometerValues2 = [180, 104, 100] + [135, 132, 139] * 120
 for i in range(25):
     magnetometerValues2.append(225)
+#---------------------------------------------------------
 
-# return acceleration values
+# returns an array
 # obtained at regular intervals, possibly every second, timer can be in main.py
-# rupali
+# appends the new acelerometer values arriving to the array
 def addAccToArray(accArray, accX=None):
     if accX is not None:
         return accArray.append(accX)
     else:
         return accArray
 
-# return the magnetic north angle, one angle returned in degrees
-# rupali
+# appends the new magnentometer values arriving to the array
+# returns an array
 def addMagToArray(magArray, mag=None):
     if mag is not None:
         return magArray.append(mag)
     else:
         return magArray
 
-# obtained from map json and used as an offset
-# rupali
+# returns NorthAtValue from map json
 def getMapNorthAt(data):
     northAtValue = data["info"]["northAt"]
     return int(northAtValue)
 
+#-----------------------testing---------------------------
 offestTest = 360 - getMapNorthAt(dummydata)
+#---------------------------------------------------------
 
+# returns the x-coordinate for the particular nodeId
 def getNodeX(node, data):
     mapVar = data['map']
     table_location = utils.build_location_table(mapVar)
     return table_location[str(node)][0]
 
+# returns the y-coordinate for the particular nodeId
 def getNodeY(node, data):
     mapVar = data['map']
     table_location = utils.build_location_table(mapVar)
     return table_location[str(node)][1]
 
+# calculates angle between two nodes
+# map orientation is:
+#       0
+# 270        90
+#      180
 def calculateAngleBetweenTwoPoints(firstX, firstY, secondX, secondY):
-    if (secondY == firstY): 
-        if (secondX > firstX): return 90
-        else: return 270
+    if (secondY == firstY):
+        if (secondX > firstX): return 90 # a person going in a straight line from left(0, 2436) to right(2152, 2436)
+        else: return 270 # a person going in a straight line from right(2152, 2436) to left(0, 2436)
     if (secondX == firstX):
-        if(secondY < firstY): return 180
-        else: return 0
-    if(secondX > firstX and secondY < firstY):
-        radianVal = (math.atan((secondX - firstX)/(secondY - firstY)))
+        if(secondY < firstY): return 180 # a person going in a straight line from up(2152, 2436) to down(2152, 731)
+        else: return 0 # a person going in a straight line from down(2152, 731) to up(2152, 2436)
+    if(secondX > firstX and secondY < firstY): # for case when user goes from P34 to P26 com 1 level 2
+        radianVal = (math.atan((secondX - firstX)/(secondY - firstY))) # atan = tan inverse
         print ("radian Val 1")
         print (radianVal)
-        print (90 + abs(180.0 * radianVal)/3.1412)
+        print (90 + abs(180.0 * radianVal)/3.1412)  #convert to degree
         return 90 + abs(180.0 * radianVal)/3.1412
-    if(secondX > firstX and secondY > firstY):
+    if(secondX > firstX and secondY > firstY):  # com 2 level 2 going from nodeId 13 to nodeId 14
         radianVal = (math.atan((secondX - firstX)/(secondY - firstY)))
         print ("radian Val 2")
         print (radianVal)
         print (abs(180.0 * radianVal)/3.1412)
         return abs(180.0 * radianVal)/3.1412
-    if(secondX < firstX and secondY < firstY):
+    if(secondX < firstX and secondY < firstY):  # com 2 level 2 going from nodeId 14 to nodeId 13
         radianVal = (math.atan((secondX - firstX)/(secondY - firstY)))
         print ("radian Val 3")
         print (radianVal)
         print (180 + (180.0 * radianVal)/3.1412)
         return 180 + abs(180.0 * radianVal)/3.1412
-    if(secondX < firstX and secondY > firstY):
+    if(secondX < firstX and secondY > firstY): # for case when user goes from P26 to P34 com1 level 2
         radianVal = (math.atan((secondX - firstX)/(secondY - firstY)))
         print ("radian Val 4")
         print (radianVal)
         print (270 + abs(180.0 * radianVal)/3.1412)
         return 270 + abs(180.0 * radianVal)/3.1412
 
-#current mag angle that the user is in
-#intended mag angle that the user needs to be in
+# current mag angle: is the mag angle that the user is in
+# intended mag angle: id the mag angle that the user needs to be in
+# if the current mag angle & intended mag angle differs a lot, the respective
+# instructions are played
 def provideDeviationAngleInfo(IntendedMagAngle, currentMagAngle):
-    dontGoStraight = 0
+    dontGoStraight = 0   # means user is going straight
     angleDiff = IntendedMagAngle - currentMagAngle
     if(angleDiff >= 0):
-        if(angleDiff >= 170 and angleDiff <= 190):
-            dontGoStraight = 1
+        if(angleDiff >= 170 and angleDiff <= 190): # for a uturn condition for the range [170,190]
+            dontGoStraight = 1  # user should not go straight
             print ("Make a UTurn")
             pygame.mixer.music.load("Uturn.wav")
             pygame.mixer.music.play()
@@ -115,7 +126,7 @@ def provideDeviationAngleInfo(IntendedMagAngle, currentMagAngle):
                 pygame.mixer.music.play()
                 while pygame.mixer.music.get_busy() == True:
                     continue
-            elif(abs(360 - angleDiff) > 120 and abs(360 - angleDiff) <= 165):
+            elif(abs(360 - angleDiff) > 120 and abs(360 - angleDiff) <= 165):  # for angleDiff of 200
                 dontGoStraight = 1
                 print("Turn left by 45 and then left by 90")
                 pygame.mixer.music.load("Left45left90.wav")
@@ -158,7 +169,7 @@ def provideDeviationAngleInfo(IntendedMagAngle, currentMagAngle):
                 pygame.mixer.music.play()
                 while pygame.mixer.music.get_busy() == True:
                     continue
-    else:
+    else:  # for negative anglediff, same logic as positive anglediff
         if(angleDiff <= -170 and angleDiff >= -190):
             dontGoStraight = 1
             print ("Make UTurn")
@@ -229,24 +240,24 @@ def provideDeviationAngleInfo(IntendedMagAngle, currentMagAngle):
     dontGoStraight = 0
     return temp
 
-# calculate distannce from curr point to next checkpoint
-# rupali
+# calculate distance from curr point to next checkpoint
 def distanceBetweenTwoCoordinates(currX, currY, nextX, nextY):
     distance = sqrt((int(nextY) - int(currY))**2 + (int(nextX) - int(currX))**2)
     return distance
 
+# returns your current x & y coordinate
 def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange, intendedMag):
-    mapAngle = nextMag - offset
-    if(mapAngle < 0):
+    mapAngle = nextMag - offset   #nextMag is the new mag value obtained frm hardware
+    if(mapAngle < 0):  #magAngle can't be less than 0
         mapAngle += 360
     if(stepTaken == True):
         if(mapAngle >= 0 and mapAngle <= 90):
             mapAngle  = mapAngle * 3.1412/180.0
-            if (xChange == 1 and yChange == 0):
+            if (xChange == 1 and yChange == 0):  # x-coord changes and y-coord const, then walk in dir of x-axis
                 return {'x' : currX + STEP_LENGTH, 'y' : currY}
-            elif (yChange == 1 and xChange == 0):
+            elif (yChange == 1 and xChange == 0): # y-coord changes and x-coord const, then walk in dir of y-axis
                 return {'x' : currX, 'y' : currY + STEP_LENGTH}
-            else:
+            else: #when both coords changes, sin & cos plays a part
                 return {'x' : currX + STEP_LENGTH * math.sin(intendedMag), 'y' : currY + STEP_LENGTH * math.cos(intendedMag)}
         elif(mapAngle > 90 and mapAngle <= 180):
             tempAngle = mapAngle - 90
@@ -275,9 +286,10 @@ def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange,
                 return {'x': currX, 'y': currY + STEP_LENGTH}
             else:
                 return {'x' : currX - STEP_LENGTH * math.cos(intendedMag), 'y' : currY + STEP_LENGTH * math.sin(intendedMag)}
-    else:
+    else: #no step taken
         return {'x' : currX, 'y': currY}
 
+#IGNORE THIS FUNCTION. IT IS NOT USED IN MAIN AS OF NOW
 def netDistanceInIntendedDirection(IntendedMagAngle, currMagAngle, currDistance, stepTaken):
     angleDiff = currMagAngle - IntendedMagAngle
     angleDiff = angleDiff * 3.1412/180.0
@@ -286,6 +298,12 @@ def netDistanceInIntendedDirection(IntendedMagAngle, currMagAngle, currDistance,
     else:
         return currDistance
 
+# DjikstraArray: is the array which consists of the nodes
+# Checkpoint: is the current node/checkpoint
+# Given a checkpoint, this function returns the next node present in the array
+# Example:
+# DjikstraArray: [1,2,4,6], Checkpoint: 2
+# The next checkpoint is 4
 def getNextCheckpoint(DjikstraArray, Checkpoint):
     if Checkpoint in DjikstraArray:
         currentIndex = DjikstraArray.index(Checkpoint)
@@ -298,29 +316,30 @@ def getNextCheckpoint(DjikstraArray, Checkpoint):
         print("Next checkpoint is the first point")
         return DjikstraArray[0]
 
+# returns the intendedMagAngle wrt current node to next node
 def getIntendedMagAngle(node1, node2, offset, data):
     node1X = getNodeX(node1, data)
     node1Y = getNodeY(node1, data)
     node2X = getNodeX(node2, data)
     node2Y = getNodeY(node2, data)
     intendedMagAngle = offset + calculateAngleBetweenTwoPoints(node1X, node1Y, node2X, node2Y)
-    if(intendedMagAngle >= 360):
+    if(intendedMagAngle >= 360):  # intendedMagAngle shud be in the range [0,359] therefore we subtract if intendedMagAngle >= 360
         return intendedMagAngle - 360
     else:
         return intendedMagAngle
 
-#returns true or false if the destination is about to be reached
+#returns true when the user is within the 70cm of a particular node. This means the user has reached that node
 def aboutToReach(locationX, locationY, nextNodeX, nextNodeY):
     return abs(distanceBetweenTwoCoordinates(locationX, locationY, nextNodeX, nextNodeY)) <= NAV_THRESHOLD
 
 
-    # get x and y of the upcoming checkpoint, dictionary to be used
+# get x and y of the upcoming checkpoint, dictionary to be used
 # include the name of the checkpoint in the dictionary too.
 # tell user to turn left, right or go straight. also blurt out
 # which checkpoint
 def provideNavInstruction(DjikstraArray, prevNode, nextNode, locationX, locationY, data, offset): #manmeet
     nextNextNode = getNextCheckpoint(DjikstraArray, nextNode)
-    if(nextNextNode == LAST_CONST):  #if nextNode is the last node
+    if(nextNextNode == LAST_CONST):  #if nextNode is the last node, you do not have to turn anywhere. Your jouney ends here
         print ("You are a hero")
         pygame.mixer.music.load("JourneyCompleted.wav")
         pygame.mixer.music.play()
@@ -328,52 +347,40 @@ def provideNavInstruction(DjikstraArray, prevNode, nextNode, locationX, location
             continue
         return ("You are a hero")
     print (nextNextNode)
-    magAngleNextToNextNext = getIntendedMagAngle(nextNode, nextNextNode, offset, data) #mag angle from next to next node
-    magAnglePrevToNext = getIntendedMagAngle(prevNode, nextNode, offset, data) #mag angle from curr node crossed to next node
-    #print "magAngleNextToNextNext"
-    #print magAngleNextToNextNext
-    #print "magAnglePrevToNext "
-    #print magAnglePrevToNext
-    # if(magAngleNextToNextNext < magAnglePrevToNext): #need to add this otherwise this test fails: provideNavInstruction([6,11,12,13,14,15,16],14,15,3800,2700,dummydata,55)
-    #     print "Turn Left"
-    #     return None
-    #angleDiff = getIntendedMagAngle(nextNode, nextNextNode) - getIntendedMagAngle(prevNode, nextNode)
+    magAngleNextToNextNext = getIntendedMagAngle(nextNode, nextNextNode, offset, data) #mag angle wrt from next node to next next node
+    magAnglePrevToNext = getIntendedMagAngle(prevNode, nextNode, offset, data) #mag angle from prev node to next node
     angleDiff = magAngleNextToNextNext - magAnglePrevToNext
-    # print "magAngleNextToNextNext"
-    # print magAngleNextToNextNext
-    # print "magAnglePrevToNext "
-    # print magAnglePrevToNext
     print ("angleDiff")
     print (angleDiff)
-    nextNodeX = getNodeX(nextNode, data)
-    nextNodeY = getNodeY(nextNode, data)
+    nextNodeX = getNodeX(nextNode, data) # get next node's x coordinate
+    nextNodeY = getNodeY(nextNode, data) # get next node's y coordinate
 
-    if(aboutToReach(locationX, locationY, nextNodeX, nextNodeY)):
+    if(aboutToReach(locationX, locationY, nextNodeX, nextNodeY)): # when user reaches within 70cm of the node/checkpoint
         print ("checkpoint reached")
         pygame.mixer.music.load("Checkpointreached.wav")
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy() == True:
             continue
-        if (abs(angleDiff) < 180):
-            if(angleDiff > 0):
+        if (abs(angleDiff) < 180): # when anglediff < 180, the following condition holds true:
+            if(angleDiff > 0):  # turn right based on how "nextnext node" is located wrt "next node"
                 print ("Turn right")
                 pygame.mixer.music.load("Right.wav")
                 pygame.mixer.music.play()
                 while pygame.mixer.music.get_busy() == True:
                     continue
-            elif(angleDiff < 0):
+            elif(angleDiff < 0): # turn left based on how "nextnext node" is located wrt "next node"
                 print ("Turn left")
                 pygame.mixer.music.load("Left.wav")
                 pygame.mixer.music.play()
                 while pygame.mixer.music.get_busy() == True:
                     continue
-            elif(angleDiff == 0):
+            elif(angleDiff == 0): # Go straight if "nextnext node" and "next node" are on the same line
                 print ("Go straight")
                 pygame.mixer.music.load("straight.wav")
                 pygame.mixer.music.play()
                 while pygame.mixer.music.get_busy() == True:
                     continue
-        else:
+        else:   # when anglediff >= 180, the following condition holds true. Observe the conditions below are opposite
             if(angleDiff < 0):
                 print ("Turn right")
                 pygame.mixer.music.load("Right.wav")
@@ -393,10 +400,14 @@ def provideNavInstruction(DjikstraArray, prevNode, nextNode, locationX, location
                 while pygame.mixer.music.get_busy() == True:
                     continue
         return True
-    else:
-        print ("Not within 150cm of your next checkpoint")
+    else: # havent reached that radius yet
+        print ("Not within 70cm of your next checkpoint")
         return False
 
+# If a user is in a random (x,y) location, this functions helps to calculate
+# the distance from the random location(x,y) to all the nodes in DjikstraArray
+# It returns that node from the DjikstraArray, which has the shortest distance to
+# random location (x,y)
 def findNearestNode(DjikstraArray, locationX, locationY, data):
     min = distanceBetweenTwoCoordinates(getNodeX(DjikstraArray[0], data), getNodeY(DjikstraArray[0], data), locationX, locationY)
     minIndex = 0
@@ -407,20 +418,22 @@ def findNearestNode(DjikstraArray, locationX, locationY, data):
             minIndex = index
     return DjikstraArray[minIndex]
 
+#IGNORE THIS FUNCTION. IT IS NOT USED IN MAIN AS OF NOW
 def provideNavigationWrtNode(nodePrev, nodeNext, currentMag,offestTest, dummydata, locationX,locationY):
     intendedMagAngle = getIntendedMagAngle(nodePrev,nodeNext,offestTest,dummydata)
     distance = distanceBetweenTwoCoordinates(getNodeX(nodeNext,dummydata),getNodeY(nodeNext,dummydata),locationX,locationY)
     print (distance)
     print ("intendedMagAngle = " + str(intendedMagAngle))
     provideDeviationAngleInfo(intendedMagAngle,currentMag)
-#testing purpose
+#----------------------------------testing purpose------------------------------------
+
 #provideNavigationWrtNode(5,3,310,180,dummydata,500,400)
 #provideNavigationWrtNode(5,3,0,180,dummydata,600,400)
 #provideNavigationWrtNode(5,3,50,180,dummydata)
 #provideNavigationWrtNode(5,3,90,180,dummydata)
 #provideNavigationWrtNode(5,3,270,180,dummydata)
-#print findNearestNode([5,3,1],1,2,dummydata)
-# print addAccToArray(accelerationX,3)
+#print (findNearestNode([1,2,3],2100,2436,dummydata))
+#print (addAccToArray([1,2,3],3))
 #print accelerationX
 #print addMagToArray(magnetometerValues,90)
 #print magnetometerValues
@@ -428,7 +441,7 @@ def provideNavigationWrtNode(nodePrev, nodeNext, currentMag,offestTest, dummydat
 #print distanceBetweenTwoCoordinates(2131,2780, 2152, 2436)
 # print offset
 #print getIntendedMagAngle(4,5,0,data)
-# print calculateAngleBetweenTwoPoints(0, 5, 1, 5.5777)
+#print (calculateAngleBetweenTwoPoints(4329,2317, 4146,2012))
 #print (provideDeviationAngleInfo(180, 110))
 #print (provideDeviationAngleInfo(90,40))
 #print (provideDeviationAngleInfo(90,270))
@@ -467,10 +480,9 @@ def provideNavigationWrtNode(nodePrev, nodeNext, currentMag,offestTest, dummydat
 # print (provideDeviationAngleInfo(90,275)) # uturn
 # print (provideDeviationAngleInfo(90,355)) # right 90
 # print (provideDeviationAngleInfo(90,360)) # right 90
-#print getNextCheckpoint([1, 2, 3], 3)
-#print findCurrentPoint(400, 300, 225, True, 180)  #x=330,y=430
-#print findCurrentPoint(400, 300, 10, True, 180) #x=393, y=260
-#print getNodeX(2, dummydata)
+#print (getNextCheckpoint([1, 2, 3], 3))
+#print (getNextCheckpoint([1, 2, 3], 1))
+#print (getNodeX(2, dummydata))
 #print getNodeY(2, dummydata)
 #provideNavInstruction([1,2,3],1,2,4,2436,dummydata,45)  #havent reached
 #provideNavInstruction([1,2,3],1,2,2150,2436,dummydata,45) #right
@@ -485,14 +497,20 @@ def provideNavigationWrtNode(nodePrev, nodeNext, currentMag,offestTest, dummydat
 #provideNavInstruction([34,26,28,30],34,26,10278,700,dummydata,45) #not within range
 #provideNavInstruction([34,26,28,30],34,26,11000,690,dummydata,45) #left
 #provideNavInstruction([34,26,28,30],26,28,11003,1200,dummydata,45) #right
-#-----2nd level com 2--------
+
+#-----put COM2Level2.json in line 14 to test the following functions--------------------
+
 #provideNavInstruction([1,17,18],1,17,1100,2900,dummydata,55)  #right
 #provideNavInstruction([6,11,12,13,14,15,16],11,12,3700,1800,dummydata,55) #right
 #provideNavInstruction([6,11,12,13,14,15,16],12,13,4100,2010,dummydata,55) #left
 #provideNavInstruction([6,11,12,13,14,15,16],13,14,4300,2300,dummydata,55)  #left
 #provideNavInstruction([6,11,12,13,14,15,16],14,15,3800,2700,dummydata,55) #left
 #provideNavInstruction([6,11,12,13,14,15,16],15,16,3700,2600,dummydata,55) #straight
-#------xyz----------
+
+#------put xyz.json in line 14 to test the following functions--------------------------
+
 # provideNavInstruction([5,3],5,3,500,300,dummydata,180) #st
 # provideNavInstruction([5,3,2],5,3,500,300,dummydata,180) #left
 # provideNavInstruction([5,2,3],5,2,500,400,dummydata,180) #
+
+#---------------------------------------------------------------------------------------

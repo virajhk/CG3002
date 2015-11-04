@@ -39,12 +39,18 @@ def addMagToArray(magArray, mag=None):
         return magArray
 
 # returns NorthAtValue from map json
-def getMapNorthAt(data):
-    northAtValue = data["info"]["northAt"]
+def getMapNorthAt(data, node):
+    if "1#2#" in node:
+        northAtValue = data["COM1#2NorthAt"]
+    elif "2#2#" in node:
+        northAtValue = data["COM2#2NorthAt"]
+    elif "2#3#" in node:
+        northAtValue = data["COM2#3NorthAt"]
+    #northAtValue = data["info"]["northAt"]
     return int(northAtValue)
 
 #-----------------------testing---------------------------
-offestTest = 360 - getMapNorthAt(dummydata)
+#offestTest = 360 - getMapNorthAt(dummydata)
 #---------------------------------------------------------
 
 # returns the x-coordinate for the particular nodeId

@@ -76,12 +76,11 @@ def Dijkstra(G,start,end=None):
 	edges, and will raise an exception if it discovers that
 	a negative edge has caused it to make a mistake.
 	"""
-
+    
 	D = {}	# dictionary of final distances
 	P = {}	# dictionary of predecessors
 	Q = priorityDictionary()   # est.dist. of non-final vert.
 	Q[start] = 0
-
 	for v in Q:
 		D[v] = Q[v]
 		if v == end: break
@@ -106,7 +105,6 @@ def shortestPath(G,start,end):
 	The output is a list of the vertices in order along
 	the shortest path.
 	"""
-
 	D,P = Dijkstra(G,start,end)
 	Path = []
 	while 1:

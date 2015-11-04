@@ -1,5 +1,6 @@
 from math import sqrt
 import re
+import json
 
 #---------------------------------------testing purpose----------------------------------------
 # from priodict import priorityDictionary
@@ -15,7 +16,6 @@ import re
 # data = json.loads(resp.text)
 #print data
 #-----------------------------------------------------------------------------------------------
-
 # sqrt((y2-y1)^2+(x2-x1)^2)
 # need to do int() otherwise the data type will unicode(undesirable)
 # the parameters end , start are tuples
@@ -142,6 +142,57 @@ def isFromSameMap(initialNode, finalNode):
     initialNodeArray = initialNode.split('#')
     finalNodeArray = finalNode.split('#')
     return (initialNodeArray[0] == finalNodeArray[0] and initialNodeArray[1] == finalNodeArray[1])
+
+def stitchMaps(map1, map2, map3):
+    map1_location = build_location_table(map1)
+    map2_location = build_location_table(map2)
+    map3_location = build_location_table(map3)
+
+    map1_neighbor = build_neighbour_table(map1)
+    map2_neighbor = build_neighbour_table(map2)
+    map3_neighbor = build_neighbour_table(map3)
+
+    map1_graph = build_graph(map1_location, map1_neighbor)
+    map2_graph = build_graph(map2_location, map2_neighbor)
+    map3_graph = build_graph(map3_location, map3_neighbor)
+
+    #map1_dict = map1_graph['1#2#31']
+    map1_graph['1#2#31']['2#2#1'] = 0.1
+    map2_graph['2#2#1']['1#2#31'] = 0.1
+    map2_graph['2#2#16']['2#3#11'] = 0.1
+    map3_graph['2#3#11']['2#2#16'] = 0.1    
+
+    stitched_graph = map1_graph.copy()
+    stitched_graph.update(map2_graph)
+    stitched_graph.update(map3_graph)
+
+    return stitched_graph
+
+# inputMap1 = {'building' : "1", "level" : str(2)}
+# #inputMap2 = {'building' : "1", "level" : str(3)}
+# inputMap3 = {'building' : "2", "level" : str(2)}
+# inputMap4 = {'building' : "2", "level" : str(3)}
+# dataArray = []
+
+# initialNode = "1#2#29"
+# finalNode = "2#3#10"
+
+# with open("{0}Level{1}.json".format("COM" + inputMap1['building'], inputMap1['level'])) as data_file:
+#     dataArray.append({("COM" + inputMap1['building'] + "#" + inputMap1['level']) : mapifyNodeIDs(json.load(data_file), inputMap1['building'], inputMap1['level'])})
+
+# with open("{0}Level{1}.json".format("COM" + inputMap3['building'], inputMap3['level'])) as data_file3:
+#     dataArray.append({("COM" + inputMap3['building'] + "#" + inputMap3['level']) : mapifyNodeIDs(json.load(data_file3), inputMap3['building'], inputMap3['level'])})
+
+# with open("{0}Level{1}.json".format("COM" + inputMap4['building'], inputMap4['level'])) as data_file4:
+#     dataArray.append({("COM" + inputMap4['building'] + "#" + inputMap4['level']) : mapifyNodeIDs(json.load(data_file4), inputMap4['building'], inputMap4['level'])})
+
+# array = initialNode.split('#')
+# initialNode = str(array[0]) + str(array[1]) + str(array[2])
+# array2 = finalNode.split('#')
+# finalNode = str(array2[0]) + str(array2[1]) + str(array2[2])
+
+# stitched_map = stitchMaps(getValueFromArrayOfDicts("COM1#2", dataArray)['map'], getValueFromArrayOfDicts("COM2#2", dataArray)['map'], getValueFromArrayOfDicts("COM2#3", dataArray)['map'])
+# print stitched_map
 
 #---------------------------------------testing purpose----------------------------------------
 # location = build_location_table(data['map'])

@@ -119,21 +119,38 @@ while keypad:
         array = response.split(',')
         start = str(array[0].split('.')[0])
         end = str(array[1].split('.')[0])
+        os.system('espeak -ven+f3 "{0}"'.format("Initial Node " + start))
+        os.system('espeak -ven+f3 "{0}"'.format("Final Node " + end))
+        #textToSpeech("Initial Node " + start)
+        #textToSpeech("Final Node " + end)
         print ("Start:" + str(start))
         print ("End:" + str(end))
-        keypad = 0
+        confirm = 1
+        while confirm:
+            response = ser.readline()
+            if (response != '' and response.split(',')[0] == '9.000'):
+                confirm = 0
+                keypad = 0
+            if (response != '' and response.split(',')[0] != '9.000'):
+                confirm = 0
 #end
+
+initialNode = start #input("Enter Initial Node: ")
+finalNode = end #input("Enter final Node: ")
+#textToSpeech("Initial Node " + initialNode)
+#textToSpeech("Final Node " + finalNode)
+
+confirm = 0
+while confirm:
+    response = ser.readline()
+    if (response != ''):
+
 
 dataArray = []
 data = {}
 data1 = {}
 data2 = {}
 finalData = {}
-
-initialNode = start #input("Enter Initial Node: ")
-finalNode = end #input("Enter final Node: ")
-textToSpeech("Initial Node " + initialNode)
-textToSpeech("Final Node " + finalNode)
 
 #Multiple maps code start
 with open("{0}Level{1}.json".format("COM" + inputMap1['building'], inputMap1['level'])) as data_file:
@@ -210,7 +227,7 @@ while(True):
     print response
     if (response != ''):
         array = response.split(',')
-        if (len(array) >= 3):
+        if (len(array) >= 6):
             tempArr = array[0].split('.')
             if (len(tempArr) >= 2):
                 if (isIntOrFloat(tempArr[0])):
@@ -223,9 +240,21 @@ while(True):
             if (len(tempArr) >= 2):
                 if (isIntOrFloat(tempArr[0])):
                     steps = int(tempArr[0])
-            print ("Alti:" + str(alti))
-            print ("Direction:" + str(heading))
-            print ("Steps:" + str(steps))
+            tempArr = array[3].split(',')
+            if (len(tempArr) >= 2):
+                if (isIntOrFloat(tempArr[0])):
+                    startStaircase_var = int(tempArr[0])
+            tempArr = array[4].split(',')
+            if (len(tempArr) >= 2):
+                if (isIntOrFloat(tempArr[0])):
+                    endStaircase_var = int(tempArr[0])
+            tempArr = array[5].split(',')
+            if (len(tempArr) >= 2):
+                if (isIntOrFloat(tempArr[0])):
+                    systemReset = int(tempArr[0])
+            #print ("Alti:" + str(alti))
+            #print ("Direction:" + str(heading))
+            #print ("Steps:" + str(steps))
     #end
     if(systemReset == 1):
         onePressed = 0
@@ -233,6 +262,7 @@ while(True):
         currPoint = {'x' : wt.getNodeX(currNodeCrossed,data), 'y': wt.getNodeX(currNodeCrossed,data)}
         wt.addAccToArray(accArray, 0)
         wt.addAccToArray(accArray, 0)
+    
     magQueue.append(heading)
     currNodeCrossedX = wt.getNodeX(currNodeCrossed,data)
     currNodeCrossedY = wt.getNodeY(currNodeCrossed,data)

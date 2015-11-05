@@ -25,8 +25,31 @@ end = ''
 heading = 0
 steps = 0
 alti = 0
+# new buttons
+startStaircase_var = 0
+endStaircase_var = 0
+onePressed = 0 #extra variable to track the continuation of stairs
+confirmationFlag = 0
+systemReset = 0
+#new buttons end
 #end
 
+#Staircase stuff
+def shouldStartStaircase(node, startStaircase_var):
+    if "2#2#16" in node:
+        if startStaircase_var == 1:
+            return 1
+        else
+            return 0
+
+def shouldEndStaircase(endStaircase_var, onePressed):
+    if onePressed == 1:
+        if endStaircase_var == 1:
+            return 1
+        else
+            return 0
+
+#end
 
 #Firmware Handshake
 while handshake:
@@ -204,6 +227,12 @@ while(True):
             print ("Direction:" + str(heading))
             print ("Steps:" + str(steps))
     #end
+    if(systemReset == 1):
+        onePressed = 0
+        currNodeCrossed = path[0]
+        currPoint = {'x' : wt.getNodeX(currNodeCrossed,data), 'y': wt.getNodeX(currNodeCrossed,data)}
+        wt.addAccToArray(accArray, 0)
+        wt.addAccToArray(accArray, 0)
     magQueue.append(heading)
     currNodeCrossedX = wt.getNodeX(currNodeCrossed,data)
     currNodeCrossedY = wt.getNodeY(currNodeCrossed,data)
@@ -227,7 +256,17 @@ while(True):
     #print "intendedMag" + str(intendedMag)
     #time.sleep(0.5)
     if(accVal < len(wt.accelerationX)):
-        wt.addAccToArray(accArray, steps)
+        if(shouldEndStaircase(endStaircase_var,onePressed) == 1):
+            onePressed = 0
+            currNodeCrossed = "2#3#11"
+            currPoint = {'x' : wt.getNodeX(currNodeCrossed,data), 'y': wt.getNodeX(currNodeCrossed,data)}
+
+        if shouldStartStaircase(currNodeCrossed, startStaircase_var) == 1:
+            onePressed = 1
+
+        if onePressed == 0:
+            wt.addAccToArray(accArray, steps)
+
         #uncomment the next line to make distance calculation work on the first pass
         #wt.addAccToArray(accArray, wt.accelerationX[accVal])
         #print accArray

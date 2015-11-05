@@ -246,7 +246,7 @@ while(True):
             stepTaken = True
     if(len(magArray) > 0):
         print ("Last value of magnetometer : " + str(abs(magArray[-1])))
-        currPoint = wt.findCurrentPoint(currPoint['x'], currPoint['y'], magArray[-1], stepTaken, offset, xChange, yChange, intendedMag)
+        currPoint = wt.findCurrentPoint(currPoint['x'], currPoint['y'], magArray[-1], stepTaken, offset, xChange, yChange, intendedMag, nextCheckpointX, nextCheckpointY)
         print ("CurrentX : "  + str(currPoint['x']) + "CurrentY : " + str(currPoint['y']))
         print ("Distance from checkpoint : " +
         str(wt.distanceBetweenTwoCoordinates(currPoint['x'], currPoint['y'], nextCheckpointX, nextCheckpointY)))

@@ -127,12 +127,18 @@ while keypad:
         print ("End:" + str(end))
         confirm = 1
         while confirm:
-            response = ser.readline()
-            if (response != '' and response.split(',')[0] == '9.000'):
-                confirm = 0
-                keypad = 0
-            if (response != '' and response.split(',')[0] != '9.000'):
-                confirm = 0
+            confirmKey = ser.readline()
+            temp = confirmKey.split(',')[0]
+            temp = int(temp.split('.')[0])
+            if (confirmKey != ''):
+                if (temp == 9):
+                    print "entered here"
+                    keypad = 0
+                    confirm = 0
+                    break
+            if (confirmKey != ''):
+                if (temp != 9):
+                    confirm = 0
 #end
 
 initialNode = start #input("Enter Initial Node: ")
@@ -141,10 +147,6 @@ finalNode = end #input("Enter final Node: ")
 #textToSpeech("Final Node " + finalNode)
 
 confirm = 0
-while confirm:
-    response = ser.readline()
-    if (response != ''):
-
 
 dataArray = []
 data = {}

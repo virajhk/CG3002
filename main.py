@@ -335,7 +335,7 @@ while(True):
                     while pygame.mixer.music.get_busy() == True:
                         continue
                     start = end
-        if(wt.aboutToReach(currPoint['x'], currPoint['y'], nextCheckpointX, nextCheckpointY)):
+        if(wt.aboutToReach(currPoint['x'], currPoint['y'], nextCheckpointX, nextCheckpointY, currNodeCrossed, nextCheckpoint)):
             print ("hello blah hello")
             print ("Checkpoint reached blah")
             approachingCheck = True

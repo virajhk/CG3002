@@ -46,7 +46,7 @@ def getMapNorthAt(data, node):
         northAtValue = data["COM2#2NorthAt"]
     elif "2#3#" in node:
         northAtValue = data["COM2#3NorthAt"]
-    #northAtValue = data["info"]["northAt"]
+
     return int(northAtValue)
 
 #-----------------------testing---------------------------
@@ -254,6 +254,9 @@ def distanceBetweenTwoCoordinates(currX, currY, nextX, nextY):
 # returns your current x & y coordinate
 def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange, intendedMag, nextCheckPointX, nextCheckPointY):
     mapAngle = nextMag - offset   #nextMag is the new mag value obtained frm hardware
+    intendedMag = intendedMag - offset
+    if(intendedMag < 0):  #magAngle can't be less than 0
+        intendedMag += 360
     if(mapAngle < 0):  #magAngle can't be less than 0
         mapAngle += 360
     if(stepTaken == True):
@@ -271,7 +274,7 @@ def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange,
                 else:
                     return {'x' : currX + STEP_LENGTH * math.sin(intendedMag), 'y' : currY + STEP_LENGTH * math.cos(intendedMag)}
         elif(mapAngle > 90 and mapAngle <= 180):
-            tempAngle = mapAngle - 90
+            tempAngle = intendedMag - 90
             tempAngle  = tempAngle * 3.1412/180.0
             if (xChange == 1 and yChange == 0):
                 return {'x' : currX + STEP_LENGTH, 'y' : currY}
@@ -279,13 +282,13 @@ def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange,
                 return {'x': currX, 'y': currY - STEP_LENGTH}
             else:
                 if (currX >= nextCheckPointX and currY > nextCheckPointY):
-                    return {'x': currX, 'y': currY - STEP_LENGTH * abs(math.sin(intendedMag))}
+                    return {'x': currX, 'y': currY - STEP_LENGTH * math.sin(tempAngle)}
                 elif (currX < nextCheckPointX and currY <= nextCheckPointY):
-                    return {'x': currX + STEP_LENGTH * math.cos(intendedMag), 'y': currY}
+                    return {'x': currX + STEP_LENGTH * math.cos(tempAngle), 'y': currY}
                 else:
-                    return {'x': currX + STEP_LENGTH * math.cos(intendedMag), 'y': currY - STEP_LENGTH * abs(math.sin(intendedMag))}
+                    return {'x': currX + STEP_LENGTH * math.cos(tempAngle), 'y': currY - STEP_LENGTH * math.sin(tempAngle)}
         elif(mapAngle > 180 and mapAngle <= 270):
-            tempAngle = mapAngle - 180
+            tempAngle = intendedMag - 180
             tempAngle  = tempAngle * 3.1412/180.0
             if (xChange == 1 and yChange == 0):
                 return {'x' : currX - STEP_LENGTH, 'y' : currY}
@@ -293,13 +296,13 @@ def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange,
                 return {'x': currX, 'y': currY - STEP_LENGTH}
             else:
                 if (currX <= nextCheckPointX and currY > nextCheckPointY):
-                    return {'x': currX, 'y' : currY - STEP_LENGTH * math.cos(intendedMag)}
+                    return {'x': currX, 'y' : currY - STEP_LENGTH * math.cos(tempAngle)}
                 elif (currX > nextCheckPointX and currY <= nextCheckPointY):
-                    return {'x': currX - STEP_LENGTH * math.sin(intendedMag), 'y' : currY}
+                    return {'x': currX - STEP_LENGTH * math.sin(tempAngle), 'y' : currY}
                 else:
-                    return {'x': currX - STEP_LENGTH * math.sin(intendedMag), 'y' : currY - STEP_LENGTH * math.cos(intendedMag)}
+                    return {'x': currX - STEP_LENGTH * math.sin(tempAngle), 'y' : currY - STEP_LENGTH * math.cos(tempAngle)}
         elif(mapAngle > 270 and mapAngle <=360):
-            tempAngle = mapAngle - 270
+            tempAngle = intendedMag - 270
             tempAngle  = tempAngle * 3.1412/180.0
             if (xChange == 1 and yChange == 0):
                 return {'x' : currX - STEP_LENGTH, 'y' : currY}
@@ -307,11 +310,11 @@ def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange,
                 return {'x': currX, 'y': currY + STEP_LENGTH}
             else:
                 if (currX <= nextCheckPointX and currY < nextCheckPointY):
-                    return {'x' : currX, 'y' : currY + STEP_LENGTH * math.sin(intendedMag)}
+                    return {'x' : currX, 'y' : currY + STEP_LENGTH * math.sin(tempAngle)}
                 elif (currX > nextCheckPointX and currY >= nextCheckPointY):
-                    return {'x' : currX - STEP_LENGTH * math.cos(intendedMag), 'y' : currY}
+                    return {'x' : currX - STEP_LENGTH * math.cos(tempAngle), 'y' : currY}
                 else:
-                    return {'x' : currX - STEP_LENGTH * math.cos(intendedMag), 'y' : currY + STEP_LENGTH * math.sin(intendedMag)}
+                    return {'x' : currX - STEP_LENGTH * math.cos(tempAngle), 'y' : currY + STEP_LENGTH * math.sin(tempAngle)}
     else: #no step taken
         return {'x' : currX, 'y': currY}
 
@@ -355,7 +358,15 @@ def getIntendedMagAngle(node1, node2, offset, data):
         return intendedMagAngle
 
 #returns true when the user is within the 70cm of a particular node. This means the user has reached that node
-def aboutToReach(locationX, locationY, nextNodeX, nextNodeY):
+def aboutToReach(locationX, locationY, nextNodeX, nextNodeY, currNode, nextNode):
+    if(currNode == "2#2#16" and nextNode == "2#3#11"):
+        return True
+    if(currNode == "2#3#11" and nextNode == "2#2#16"):
+        return True
+    if(currNode == "1#2#31" and nextNode == "2#2#1"):
+        return True
+    if(currNode == "2#2#1" and nextNode == "1#2#31"):
+        return True
     return abs(distanceBetweenTwoCoordinates(locationX, locationY, nextNodeX, nextNodeY)) <= NAV_THRESHOLD
 
 

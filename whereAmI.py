@@ -268,9 +268,9 @@ def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange,
                 return {'x' : currX, 'y' : currY + STEP_LENGTH}
             else: #when both coords changes, sin & cos plays a part
                 if (currX >= nextCheckPointX and currY < nextCheckPointY):
-                    return {'x' : currX, 'y' : currY + STEP_LENGTH * math.cos(intendedMag)}
+                    return {'x' : currX, 'y' : currY + (STEP_LENGTH * math.cos(intendedMag) + STEP_LENGTH * math.sin(intendedMag))}
                 elif (currX < nextCheckPointX and currY >= nextCheckPointY):
-                    return {'x' : currX + STEP_LENGTH * math.sin(intendedMag), 'y' : currY}
+                    return {'x' : currX + (STEP_LENGTH * math.sin(intendedMag) + STEP_LENGTH * math.cos(intendedMag)), 'y' : currY}
                 else:
                     return {'x' : currX + STEP_LENGTH * math.sin(intendedMag), 'y' : currY + STEP_LENGTH * math.cos(intendedMag)}
         elif(mapAngle > 90 and mapAngle <= 180):
@@ -282,9 +282,9 @@ def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange,
                 return {'x': currX, 'y': currY - STEP_LENGTH}
             else:
                 if (currX >= nextCheckPointX and currY > nextCheckPointY):
-                    return {'x': currX, 'y': currY - STEP_LENGTH * math.sin(tempAngle)}
+                    return {'x': currX, 'y': currY - (STEP_LENGTH * math.sin(tempAngle) + STEP_LENGTH * math.cos(tempAngle))}
                 elif (currX < nextCheckPointX and currY <= nextCheckPointY):
-                    return {'x': currX + STEP_LENGTH * math.cos(tempAngle), 'y': currY}
+                    return {'x': currX + (STEP_LENGTH * math.cos(tempAngle) + STEP_LENGTH * math.sin(tempAngle)), 'y': currY}
                 else:
                     return {'x': currX + STEP_LENGTH * math.cos(tempAngle), 'y': currY - STEP_LENGTH * math.sin(tempAngle)}
         elif(mapAngle > 180 and mapAngle <= 270):
@@ -296,9 +296,9 @@ def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange,
                 return {'x': currX, 'y': currY - STEP_LENGTH}
             else:
                 if (currX <= nextCheckPointX and currY > nextCheckPointY):
-                    return {'x': currX, 'y' : currY - STEP_LENGTH * math.cos(tempAngle)}
+                    return {'x': currX, 'y' : currY - (STEP_LENGTH * math.cos(tempAngle) + STEP_LENGTH * math.sin(tempAngle))}
                 elif (currX > nextCheckPointX and currY <= nextCheckPointY):
-                    return {'x': currX - STEP_LENGTH * math.sin(tempAngle), 'y' : currY}
+                    return {'x': currX - (STEP_LENGTH * math.sin(tempAngle) + STEP_LENGTH * math.cos(tempAngle)), 'y' : currY}
                 else:
                     return {'x': currX - STEP_LENGTH * math.sin(tempAngle), 'y' : currY - STEP_LENGTH * math.cos(tempAngle)}
         elif(mapAngle > 270 and mapAngle <=360):
@@ -310,9 +310,9 @@ def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange,
                 return {'x': currX, 'y': currY + STEP_LENGTH}
             else:
                 if (currX <= nextCheckPointX and currY < nextCheckPointY):
-                    return {'x' : currX, 'y' : currY + STEP_LENGTH * math.sin(tempAngle)}
+                    return {'x' : currX, 'y' : currY + (STEP_LENGTH * math.sin(tempAngle) + STEP_LENGTH * math.cos(tempAngle))}
                 elif (currX > nextCheckPointX and currY >= nextCheckPointY):
-                    return {'x' : currX - STEP_LENGTH * math.cos(tempAngle), 'y' : currY}
+                    return {'x' : currX - (STEP_LENGTH * math.cos(tempAngle) + STEP_LENGTH * math.sin(tempAngle)), 'y' : currY}
                 else:
                     return {'x' : currX - STEP_LENGTH * math.cos(tempAngle), 'y' : currY + STEP_LENGTH * math.sin(tempAngle)}
     else: #no step taken
@@ -392,7 +392,7 @@ def provideNavInstruction(DjikstraArray, prevNode, nextNode, locationX, location
     nextNodeX = getNodeX(nextNode, data) # get next node's x coordinate
     nextNodeY = getNodeY(nextNode, data) # get next node's y coordinate
 
-    if(aboutToReach(locationX, locationY, nextNodeX, nextNodeY)): # when user reaches within 70cm of the node/checkpoint
+    if(aboutToReach(locationX, locationY, nextNodeX, nextNodeY, prevNode, nextNode)): # when user reaches within 70cm of the node/checkpoint
         print ("checkpoint reached")
         pygame.mixer.music.load("Checkpointreached.wav")
         pygame.mixer.music.play()

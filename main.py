@@ -329,7 +329,7 @@ while(True):
             checkGoStraight = wt.provideDeviationAngleInfo(intendedMag, magArray[-1])
             if (checkGoStraight == 0):
                 end = time.time()
-                if (end - start >= 3 and stepTaken == True):
+                if (end - start >= 2 and stepTaken == True):
                     pygame.mixer.music.load("Move.wav")
                     pygame.mixer.music.play()
                     while pygame.mixer.music.get_busy() == True:

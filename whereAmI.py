@@ -78,25 +78,29 @@ def calculateAngleBetweenTwoPoints(firstX, firstY, secondX, secondY):
         if(secondY < firstY): return 180 # a person going in a straight line from up(2152, 2436) to down(2152, 731)
         else: return 0 # a person going in a straight line from down(2152, 731) to up(2152, 2436)
     if(secondX > firstX and secondY < firstY): # for case when user goes from P34 to P26 com 1 level 2
-        radianVal = (math.atan((secondX - firstX)/(secondY - firstY))) # atan = tan inverse
+        radianVal = (math.atan(float(secondX - firstX)/float(firstY - secondY))) # atan = tan inverse
+        radianVal = 1.5708 - radianVal
         print ("radian Val 1")
         print (radianVal)
         print (90 + abs(180.0 * radianVal)/3.1412)  #convert to degree
         return 90 + abs(180.0 * radianVal)/3.1412
     if(secondX > firstX and secondY > firstY):  # com 2 level 2 going from nodeId 13 to nodeId 14
-        radianVal = (math.atan((secondX - firstX)/(secondY - firstY)))
+        radianVal = (math.atan(float(secondX - firstX)/float(secondY - firstY)))
+        radianVal = 1.5708 - radianVal
         print ("radian Val 2")
         print (radianVal)
         print (abs(180.0 * radianVal)/3.1412)
         return abs(180.0 * radianVal)/3.1412
     if(secondX < firstX and secondY < firstY):  # com 2 level 2 going from nodeId 14 to nodeId 13
-        radianVal = (math.atan((secondX - firstX)/(secondY - firstY)))
+        radianVal = (math.atan(float(secondX - firstX)/float(secondY - firstY)))
+        radianVal = 1.5708 - radianVal
         print ("radian Val 3")
         print (radianVal)
         print (180 + (180.0 * radianVal)/3.1412)
         return 180 + abs(180.0 * radianVal)/3.1412
     if(secondX < firstX and secondY > firstY): # for case when user goes from P26 to P34 com1 level 2
-        radianVal = (math.atan((secondX - firstX)/(secondY - firstY)))
+        radianVal = (math.atan(float(firstX - secondX)/float(secondY - firstY)))
+        radianVal = 1.5708 - radianVal
         print ("radian Val 4")
         print (radianVal)
         print (270 + abs(180.0 * radianVal)/3.1412)
@@ -260,8 +264,9 @@ def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange,
     if(mapAngle < 0):  #magAngle can't be less than 0
         mapAngle += 360
     if(stepTaken == True):
-        if(mapAngle >= 0 and mapAngle <= 90):
+        if(intendedMag >= 0 and intendedMag <= 90):
             mapAngle  = mapAngle * 3.1412/180.0
+            intendedMag = intendedMag * 3.1412/180.0
             if (xChange == 1 and yChange == 0):  # x-coord changes and y-coord const, then walk in dir of x-axis
                 return {'x' : currX + STEP_LENGTH, 'y' : currY}
             elif (yChange == 1 and xChange == 0): # y-coord changes and x-coord const, then walk in dir of y-axis
@@ -273,7 +278,7 @@ def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange,
                     return {'x' : currX + (STEP_LENGTH * math.sin(intendedMag) + STEP_LENGTH * math.cos(intendedMag)), 'y' : currY}
                 else:
                     return {'x' : currX + STEP_LENGTH * math.sin(intendedMag), 'y' : currY + STEP_LENGTH * math.cos(intendedMag)}
-        elif(mapAngle > 90 and mapAngle <= 180):
+        elif(intendedMag > 90 and intendedMag <= 180):
             tempAngle = intendedMag - 90
             tempAngle  = tempAngle * 3.1412/180.0
             if (xChange == 1 and yChange == 0):
@@ -287,7 +292,7 @@ def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange,
                     return {'x': currX + (STEP_LENGTH * math.cos(tempAngle) + STEP_LENGTH * math.sin(tempAngle)), 'y': currY}
                 else:
                     return {'x': currX + STEP_LENGTH * math.cos(tempAngle), 'y': currY - STEP_LENGTH * math.sin(tempAngle)}
-        elif(mapAngle > 180 and mapAngle <= 270):
+        elif(intendedMag > 180 and intendedMag <= 270):
             tempAngle = intendedMag - 180
             tempAngle  = tempAngle * 3.1412/180.0
             if (xChange == 1 and yChange == 0):
@@ -301,7 +306,7 @@ def findCurrentPoint(currX, currY, nextMag, stepTaken, offset, xChange, yChange,
                     return {'x': currX - (STEP_LENGTH * math.sin(tempAngle) + STEP_LENGTH * math.cos(tempAngle)), 'y' : currY}
                 else:
                     return {'x': currX - STEP_LENGTH * math.sin(tempAngle), 'y' : currY - STEP_LENGTH * math.cos(tempAngle)}
-        elif(mapAngle > 270 and mapAngle <=360):
+        elif(intendedMag > 270 and intendedMag <=360):
             tempAngle = intendedMag - 270
             tempAngle  = tempAngle * 3.1412/180.0
             if (xChange == 1 and yChange == 0):

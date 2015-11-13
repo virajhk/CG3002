@@ -200,7 +200,7 @@ path = list(path[0].values())[0]
 #main algorithm
 #offset = 360 - wt.getMapNorthAt(data)
 givenMagValue = 131;
-magQueue = deque([], maxlen=5)
+magQueue = deque([], maxlen=4)
 magQueue.append(givenMagValue)
 #data initially is the initialNode map's data
 # IMPORTANT: data needs to get updated everywhere in the while(true) if the node is from a new map.
@@ -313,8 +313,8 @@ while(True):
         break
     if(len(accArray) > 1):
         if(abs(accArray[-1] - accArray[-2]) >= 1):
-	    print ("Last value of steps : " + str(abs(accArray[-1])))
-            stepTaken = True
+	       print ("Last value of steps : " + str(abs(accArray[-1])))
+           stepTaken = True
     if(len(magArray) > 0):
         print ("Last value of magnetometer : " + str(abs(magArray[-1])))
         currPoint = wt.findCurrentPoint(currPoint['x'], currPoint['y'], magArray[-1], stepTaken, offset, xChange, yChange, intendedMag, nextCheckpointX, nextCheckpointY)
@@ -329,7 +329,7 @@ while(True):
             checkGoStraight = wt.provideDeviationAngleInfo(intendedMag, magArray[-1])
             if (checkGoStraight == 0):
                 end = time.time()
-                if (end - start >= 2 and stepTaken == True):
+                if (end - start >= 1 and stepTaken == True):
                     pygame.mixer.music.load("Move.wav")
                     pygame.mixer.music.play()
                     while pygame.mixer.music.get_busy() == True:

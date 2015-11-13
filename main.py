@@ -39,14 +39,14 @@ def shouldStartStaircase(node, startStaircase_var):
     if "2#2#16" in node:
         if startStaircase_var == 1:
             return 1
-        else
+        else:
             return 0
 
 def shouldEndStaircase(endStaircase_var, onePressed):
     if onePressed == 1:
         if endStaircase_var == 1:
             return 1
-        else
+        else:
             return 0
 
 #end
@@ -313,8 +313,8 @@ while(True):
         break
     if(len(accArray) > 1):
         if(abs(accArray[-1] - accArray[-2]) >= 1):
-	       print ("Last value of steps : " + str(abs(accArray[-1])))
-           stepTaken = True
+            print ("Last value of steps : " + str(abs(accArray[-1])))
+            stepTaken = True
     if(len(magArray) > 0):
         print ("Last value of magnetometer : " + str(abs(magArray[-1])))
         currPoint = wt.findCurrentPoint(currPoint['x'], currPoint['y'], magArray[-1], stepTaken, offset, xChange, yChange, intendedMag, nextCheckpointX, nextCheckpointY)

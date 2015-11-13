@@ -372,6 +372,14 @@ def aboutToReach(locationX, locationY, nextNodeX, nextNodeY, currNode, nextNode)
         return True
     if(currNode == "2#2#1" and nextNode == "1#2#31"):
         return True
+    if(currNode == "2#2#5" and nextNode == "2#2#19"):
+        return abs(distanceBetweenTwoCoordinates(locationX, locationY, nextNodeX, nextNodeY)) <= (NAV_THRESHOLD + 250)
+    if(currNode == "2#2#19" and nextNode == "2#2#5"):
+        return abs(distanceBetweenTwoCoordinates(locationX, locationY, nextNodeX, nextNodeY)) <= (NAV_THRESHOLD + 250)
+    if(currNode == "2#2#19" and nextNode == "2#2#6"):
+        return abs(distanceBetweenTwoCoordinates(locationX, locationY, nextNodeX, nextNodeY)) <= (NAV_THRESHOLD + 100)
+    if(currNode == "2#2#6" and nextNode == "2#2#19"):
+        return abs(distanceBetweenTwoCoordinates(locationX, locationY, nextNodeX, nextNodeY)) <= (NAV_THRESHOLD + 100)
     return abs(distanceBetweenTwoCoordinates(locationX, locationY, nextNodeX, nextNodeY)) <= NAV_THRESHOLD
 
 
